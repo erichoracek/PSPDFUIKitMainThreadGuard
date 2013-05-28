@@ -48,18 +48,16 @@ __attribute__((constructor)) static void PSPDFUIKitMainThreadGuard(void) {
     @autoreleasepool {
         for (NSString *selector in @[PROPERTY(setNeedsLayout), PROPERTY(setNeedsDisplay), PROPERTY(setNeedsDisplayInRect:)]) {
             SEL newSelector = NSSelectorFromString([NSString stringWithFormat:@"pspdf_%@", selector]);
-            for (Class theClass in @[UIView.class, CALayer.class]) {
-                if ([selector hasSuffix:@":"]) {
-                    PSPDFReplaceMethod(theClass, NSSelectorFromString(selector), newSelector, imp_implementationWithBlock(^(UIView *_self, CGRect r) {
-                        PSPDFAssertIfNotMainThread();
-                        ((void ( *)(id, SEL, CGRect))objc_msgSend)(_self, newSelector, r);
-                    }));
-                }else {
-                    PSPDFReplaceMethod(theClass, NSSelectorFromString(selector), newSelector, imp_implementationWithBlock(^(UIView *_self) {
-                        PSPDFAssertIfNotMainThread();
-                        ((void ( *)(id, SEL))objc_msgSend)(_self, newSelector);
-                    }));
-                }
+            if ([selector hasSuffix:@":"]) {
+                PSPDFReplaceMethod(UIView.class, NSSelectorFromString(selector), newSelector, imp_implementationWithBlock(^(UIView *_self, CGRect r) {
+                    PSPDFAssertIfNotMainThread();
+                    ((void ( *)(id, SEL, CGRect))objc_msgSend)(_self, newSelector, r);
+                }));
+            }else {
+                PSPDFReplaceMethod(UIView.class, NSSelectorFromString(selector), newSelector, imp_implementationWithBlock(^(UIView *_self) {
+                    PSPDFAssertIfNotMainThread();
+                    ((void ( *)(id, SEL))objc_msgSend)(_self, newSelector);
+                }));
             }
         }
     }
