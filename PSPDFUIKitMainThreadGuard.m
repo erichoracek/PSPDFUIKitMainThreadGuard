@@ -4,6 +4,16 @@
 
 #define PROPERTY(propName) NSStringFromSelector(@selector(propName))
 
+// A better assert. NSAssert is too runtime dependant, and assert() doesn't log.
+// http://www.mikeash.com/pyblog/friday-qa-2013-05-03-proper-use-of-asserts.html
+// Accepts both:
+// - PSPDFAssert(x > 0);
+// - PSPDFAssert(y > 3, @"Bad value for y");
+#define PSPDFAssert(expression, ...) \
+do { if(!(expression)) { \
+NSLog(@"%@", [NSString stringWithFormat: @"Assertion failure: %s in %s on line %s:%d. %@", #expression, __PRETTY_FUNCTION__, __FILE__, __LINE__, [NSString stringWithFormat:@"" __VA_ARGS__]]); \
+abort(); }} while(0)
+
 // You should only use this in debug builds. It doesn't use private API, but I wouldn't ship it.
 #ifdef DEBUG
 
