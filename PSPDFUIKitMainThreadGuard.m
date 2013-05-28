@@ -2,6 +2,8 @@
 #import <objc/message.h>
 #import <QuartzCore/QuartzCore.h>
 
+#define PROPERTY(propName) NSStringFromSelector(@selector(propName))
+
 // You should only use this in debug builds. It doesn't use private API, but I wouldn't ship it.
 #ifdef DEBUG
 
