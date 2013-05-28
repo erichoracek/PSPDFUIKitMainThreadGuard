@@ -2,6 +2,9 @@
 #import <objc/message.h>
 #import <QuartzCore/QuartzCore.h>
 
+// You should only use this in debug builds. It doesn't use private API, but I wouldn't ship it.
+#ifdef DEBUG
+
 static void PSPDFSwizzleMethod(Class c, SEL orig, SEL new) {
     Method origMethod = class_getInstanceMethod(c, orig);
     Method newMethod = class_getInstanceMethod(c, new);
@@ -49,3 +52,4 @@ __attribute__((constructor)) static void PSPDFUIKitMainThreadGuard(void) {
         }
     }
 }
+#endif
