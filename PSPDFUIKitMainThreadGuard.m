@@ -58,12 +58,12 @@ __attribute__((constructor)) static void PSPDFUIKitMainThreadGuard(void) {
             SEL selector = NSSelectorFromString(selStr);
             SEL newSelector = NSSelectorFromString([NSString stringWithFormat:@"pspdf_%@", selStr]);
             if ([selStr hasSuffix:@":"]) {
-                PSPDFReplaceMethodWithBlock(UIView.class, selector, newSelector, ^(UIView *_self, CGRect r) {
+                PSPDFReplaceMethodWithBlock(UIView.class, selector, newSelector, ^(__unsafe_unretained UIView *_self, CGRect r) {
                     PSPDFAssertIfNotMainThread();
                     ((void ( *)(id, SEL, CGRect))objc_msgSend)(_self, newSelector, r);
                 });
             }else {
-                PSPDFReplaceMethodWithBlock(UIView.class, selector, newSelector, ^(UIView *_self) {
+                PSPDFReplaceMethodWithBlock(UIView.class, selector, newSelector, ^(__unsafe_unretained UIView *_self) {
                     PSPDFAssertIfNotMainThread();
                     ((void ( *)(id, SEL))objc_msgSend)(_self, newSelector);
                 });
