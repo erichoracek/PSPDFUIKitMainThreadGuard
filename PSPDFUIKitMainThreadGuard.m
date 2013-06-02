@@ -1,6 +1,6 @@
 // Taken from the commercial iOS PDF framework http://pspdfkit.com.
 // Copyright (c) 2013 Peter Steinberger. All rights reserved.
-// Licensed under MIT.
+// Licensed under MIT (http://opensource.org/licenses/MIT)
 //
 // You should only use this in debug builds. It doesn't use private API, but I wouldn't ship it.
 
