@@ -24,6 +24,9 @@ do { if(!(expression)) { \
 NSLog(@"%@", [NSString stringWithFormat: @"Assertion failure: %s in %s on line %s:%d. %@", #expression, __PRETTY_FUNCTION__, __FILE__, __LINE__, [NSString stringWithFormat:@"" __VA_ARGS__]]); \
 abort(); }} while(0)
 
+///////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark - Helper for Swizzling
+
 BOOL PSPDFReplaceMethodWithBlock(Class c, SEL origSEL, SEL newSEL, id block) {
     PSPDFAssert(c && origSEL && newSEL && block);
     Method origMethod = class_getInstanceMethod(c, origSEL);
