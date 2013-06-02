@@ -1,12 +1,18 @@
 // Taken from the commercial iOS PDF framework http://pspdfkit.com.
 // Copyright (c) 2013 Peter Steinberger. All rights reserved.
 // Licensed under MIT.
+//
+// You should only use this in debug builds. It doesn't use private API, but I wouldn't ship it.
 
 #import <objc/runtime.h>
 #import <objc/message.h>
 #import <QuartzCore/QuartzCore.h>
 
+#if DEBUG
 #define PROPERTY(propName) NSStringFromSelector(@selector(propName))
+#else
+#define PROPERTY(propName) @#propName
+#endif
 
 // A better assert. NSAssert is too runtime dependant, and assert() doesn't log.
 // http://www.mikeash.com/pyblog/friday-qa-2013-05-03-proper-use-of-asserts.html
@@ -17,9 +23,6 @@
 do { if(!(expression)) { \
 NSLog(@"%@", [NSString stringWithFormat: @"Assertion failure: %s in %s on line %s:%d. %@", #expression, __PRETTY_FUNCTION__, __FILE__, __LINE__, [NSString stringWithFormat:@"" __VA_ARGS__]]); \
 abort(); }} while(0)
-
-// You should only use this in debug builds. It doesn't use private API, but I wouldn't ship it.
-#ifdef DEBUG
 
 BOOL PSPDFReplaceMethodWithBlock(Class c, SEL origSEL, SEL newSEL, id block) {
     NSCParameterAssert(c && origSEL && newSEL && block);
@@ -75,5 +78,3 @@ __attribute__((constructor)) static void PSPDFUIKitMainThreadGuard(void) {
         }
     }
 }
-
-#endif
