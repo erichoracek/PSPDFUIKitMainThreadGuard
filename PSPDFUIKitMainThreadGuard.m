@@ -17,21 +17,29 @@ abort(); }} while(0)
 // You should only use this in debug builds. It doesn't use private API, but I wouldn't ship it.
 #ifdef DEBUG
 
-static void PSPDFSwizzleMethod(Class c, SEL orig, SEL new) {
-    Method origMethod = class_getInstanceMethod(c, orig);
-    Method newMethod = class_getInstanceMethod(c, new);
-    if (class_addMethod(c, orig, method_getImplementation(newMethod), method_getTypeEncoding(newMethod))) {
-        class_replaceMethod(c, new, method_getImplementation(origMethod), method_getTypeEncoding(origMethod));
-    }else {
-        method_exchangeImplementations(origMethod, newMethod);
-    }
-}
+BOOL PSPDFReplaceMethodWithBlock(Class c, SEL origSEL, SEL newSEL, id block) {
+    NSCParameterAssert(c && origSEL && newSEL && block);
+    Method origMethod = class_getInstanceMethod(c, origSEL);
+    const char *encoding = method_getTypeEncoding(origMethod);
 
-void PSPDFReplaceMethod(Class c, SEL orig, SEL newSel, IMP impl) {
-    Method method = class_getInstanceMethod(c, orig);
-    if (!class_addMethod(c, newSel, impl, method_getTypeEncoding(method))) {
-        NSLog(@"Failed to add method: %@ on %@", NSStringFromSelector(newSel), c);
-    }else PSPDFSwizzleMethod(c, orig, newSel);
+    // Add the new method.
+    IMP impl = imp_implementationWithBlock(block);
+    if (!class_addMethod(c, newSEL, impl, encoding)) {
+        NSLog(@"Failed to add method: %@ on %@", NSStringFromSelector(newSEL), c);
+        return NO;
+    }else {
+        // Ensure the new selector has the same parameters as the existing selector.
+        Method newMethod = class_getInstanceMethod(c, newSEL);
+        NSCAssert(strcmp(method_getTypeEncoding(origMethod), method_getTypeEncoding(newMethod)) == 0, @"Encoding must be the same.");
+
+        // If original doesn't implement the method we want to swizzle, create it.
+        if (class_addMethod(c, origSEL, method_getImplementation(newMethod), encoding)) {
+            class_replaceMethod(c, newSEL, method_getImplementation(origMethod), encoding);
+        }else {
+            method_exchangeImplementations(origMethod, newMethod);
+        }
+    }
+    return YES;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////
@@ -46,18 +54,19 @@ static void PSPDFAssertIfNotMainThread(void) {
 // @note No private API is used here.
 __attribute__((constructor)) static void PSPDFUIKitMainThreadGuard(void) {
     @autoreleasepool {
-        for (NSString *selector in @[PROPERTY(setNeedsLayout), PROPERTY(setNeedsDisplay), PROPERTY(setNeedsDisplayInRect:)]) {
-            SEL newSelector = NSSelectorFromString([NSString stringWithFormat:@"pspdf_%@", selector]);
-            if ([selector hasSuffix:@":"]) {
-                PSPDFReplaceMethod(UIView.class, NSSelectorFromString(selector), newSelector, imp_implementationWithBlock(^(UIView *_self, CGRect r) {
+        for (NSString *selStr in @[PROPERTY(setNeedsLayout), PROPERTY(setNeedsDisplay), PROPERTY(setNeedsDisplayInRect:)]) {
+            SEL selector = NSSelectorFromString(selStr);
+            SEL newSelector = NSSelectorFromString([NSString stringWithFormat:@"pspdf_%@", selStr]);
+            if ([selStr hasSuffix:@":"]) {
+                PSPDFReplaceMethodWithBlock(UIView.class, selector, newSelector, ^(UIView *_self, CGRect r) {
                     PSPDFAssertIfNotMainThread();
                     ((void ( *)(id, SEL, CGRect))objc_msgSend)(_self, newSelector, r);
-                }));
+                });
             }else {
-                PSPDFReplaceMethod(UIView.class, NSSelectorFromString(selector), newSelector, imp_implementationWithBlock(^(UIView *_self) {
+                PSPDFReplaceMethodWithBlock(UIView.class, selector, newSelector, ^(UIView *_self) {
                     PSPDFAssertIfNotMainThread();
                     ((void ( *)(id, SEL))objc_msgSend)(_self, newSelector);
-                }));
+                });
             }
         }
     }
