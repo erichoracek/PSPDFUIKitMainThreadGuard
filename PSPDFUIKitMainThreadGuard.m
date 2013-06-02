@@ -30,7 +30,7 @@ static void PSPDFSwizzleMethod(Class c, SEL orig, SEL new) {
 void PSPDFReplaceMethod(Class c, SEL orig, SEL newSel, IMP impl) {
     Method method = class_getInstanceMethod(c, orig);
     if (!class_addMethod(c, newSel, impl, method_getTypeEncoding(method))) {
-        PSPDFLogError(@"Failed to add method: %@ on %@", NSStringFromSelector(newSel), c);
+        NSLog(@"Failed to add method: %@ on %@", NSStringFromSelector(newSel), c);
     }else PSPDFSwizzleMethod(c, orig, newSel);
 }
 
@@ -38,7 +38,7 @@ void PSPDFReplaceMethod(Class c, SEL orig, SEL newSel, IMP impl) {
 #pragma mark - Tracks down calls to UIKit from a Thread other than Main
 
 static void PSPDFAssertIfNotMainThread(void) {
-    PSPDFAssert([NSThread isMainThread], @"\nERROR: All calls to UIKit need to happen on the main thread. You have a bug in your code. Use dispatch_async(dispatch_get_main_queue(), ^{ ... }); if you're unsure what thread you're in.\n\nBreak on PSPDFAssertIfNotMainThread to find out where.\n\nStacktrace: %@", [NSThread callStackSymbols]);
+    PSPDFAssert(NSThread.isMainThread, @"\nERROR: All calls to UIKit need to happen on the main thread. You have a bug in your code. Use dispatch_async(dispatch_get_main_queue(), ^{ ... }); if you're unsure what thread you're in.\n\nBreak on PSPDFAssertIfNotMainThread to find out where.\n\nStacktrace: %@", [NSThread callStackSymbols]);
 }
 
 // This installs a small guard that checks for the most common threading-errors in UIKit.
