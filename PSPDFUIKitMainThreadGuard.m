@@ -25,7 +25,7 @@ NSLog(@"%@", [NSString stringWithFormat: @"Assertion failure: %s in %s on line %
 abort(); }} while(0)
 
 BOOL PSPDFReplaceMethodWithBlock(Class c, SEL origSEL, SEL newSEL, id block) {
-    NSCParameterAssert(c && origSEL && newSEL && block);
+    PSPDFAssert(c && origSEL && newSEL && block);
     Method origMethod = class_getInstanceMethod(c, origSEL);
     const char *encoding = method_getTypeEncoding(origMethod);
 
@@ -37,7 +37,7 @@ BOOL PSPDFReplaceMethodWithBlock(Class c, SEL origSEL, SEL newSEL, id block) {
     }else {
         // Ensure the new selector has the same parameters as the existing selector.
         Method newMethod = class_getInstanceMethod(c, newSEL);
-        NSCAssert(strcmp(method_getTypeEncoding(origMethod), method_getTypeEncoding(newMethod)) == 0, @"Encoding must be the same.");
+        PSPDFAssert(strcmp(method_getTypeEncoding(origMethod), method_getTypeEncoding(newMethod)) == 0, @"Encoding must be the same.");
 
         // If original doesn't implement the method we want to swizzle, create it.
         if (class_addMethod(c, origSEL, method_getImplementation(newMethod), encoding)) {
