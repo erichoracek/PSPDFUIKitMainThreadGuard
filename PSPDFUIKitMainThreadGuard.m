@@ -6,7 +6,6 @@
 
 #import <objc/runtime.h>
 #import <objc/message.h>
-#import <QuartzCore/QuartzCore.h>
 
 // Compile-time selector checks.
 #if DEBUG
