@@ -8,6 +8,7 @@
 #import <objc/message.h>
 #import <QuartzCore/QuartzCore.h>
 
+// Compile-time selector checks.
 #if DEBUG
 #define PROPERTY(propName) NSStringFromSelector(@selector(propName))
 #else
