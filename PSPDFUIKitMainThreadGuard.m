@@ -1,3 +1,7 @@
+// Taken from the commercial iOS PDF framework http://pspdfkit.com.
+// Copyright (c) 2013 Peter Steinberger. All rights reserved.
+// Licensed under MIT.
+
 #import <objc/runtime.h>
 #import <objc/message.h>
 #import <QuartzCore/QuartzCore.h>
