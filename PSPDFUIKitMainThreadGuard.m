@@ -4,17 +4,14 @@
 //
 // You should only use this in debug builds. It doesn't use private API, but I wouldn't ship it.
 
+#if DEBUG
+
 @import Foundation;
 @import UIKit;
 #import <objc/runtime.h>
 #import <objc/message.h>
 
-// Compile-time selector checks.
-#if DEBUG
 #define PROPERTY(propName) NSStringFromSelector(@selector(propName))
-#else
-#define PROPERTY(propName) @#propName
-#endif
 
 #define PSPDFAssert(expression, ...) \
 do { if(!(expression)) { \
@@ -96,3 +93,5 @@ __attribute__((constructor)) static void PSPDFUIKitMainThreadGuard(void) {
         }
     }
 }
+
+#endif
